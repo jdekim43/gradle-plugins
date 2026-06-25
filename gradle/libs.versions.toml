@@ -1,0 +1,15 @@
+[versions]
+kotlin = "2.4.0"
+gradle-plugin-publish = "2.1.1"
+aws-sdk = "2.46.16"
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish" }
+
+[libraries]
+aws-bom = { module = "software.amazon.awssdk:bom", version.ref = "aws-sdk" }
+aws-codeartifact = { module = "software.amazon.awssdk:codeartifact" }
+aws-sts = { module = "software.amazon.awssdk:sts" }
+aws-sso = { module = "software.amazon.awssdk:sso" }
+aws-sso-oidc = { module = "software.amazon.awssdk:ssooidc" }
