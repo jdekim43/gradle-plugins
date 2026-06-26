@@ -8,6 +8,6 @@ enum class CodeArtifactRepositoryType {
     companion object {
         fun from(pathName: String): CodeArtifactRepositoryType =
             entries.firstOrNull { it.pathName.equals(pathName, true) }
-                ?: throw IllegalArgumentException("Repository type $pathName is not supported")
+                ?: throw IllegalArgumentException("Repository type ($pathName) is not supported")
     }
 }

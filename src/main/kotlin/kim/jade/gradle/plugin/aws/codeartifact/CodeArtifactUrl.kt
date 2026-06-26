@@ -38,7 +38,7 @@ data class CodeArtifactUrl(
     constructor(url: URL) : this(
         url,
         url.host.split('.'),
-        url.path.removeSuffix("/").split('/'),
+        url.path.removePrefix("/").removeSuffix("/").split('/'),
     )
 
     private constructor(

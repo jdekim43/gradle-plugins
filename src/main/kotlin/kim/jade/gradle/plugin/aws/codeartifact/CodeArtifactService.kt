@@ -19,7 +19,7 @@ class CodeArtifactService : BuildService<CodeArtifactService.Parameter> {
         )
     }
 
-    class Parameter : BuildServiceParameters
+    open class Parameter : BuildServiceParameters
 
     private data class CacheKey(
         val url: CodeArtifactUrl,
