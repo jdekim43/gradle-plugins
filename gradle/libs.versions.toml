@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.4.0"
+kotlin = "2.2.21"
 gradle-plugin-publish = "2.1.1"
 aws-sdk = "2.46.16"
 
