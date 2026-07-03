@@ -15,7 +15,7 @@ import java.net.URI
 @Suppress("unused")
 fun RepositoryHandler.codeArtifact(
     repositoryUrl: String,
-    profile: String = "default",
+    profile: String,
     action: Action<in MavenArtifactRepository>? = null,
 ) = codeArtifact(repositoryUrl, ProfileCredentialsProvider.create(profile), action)
 

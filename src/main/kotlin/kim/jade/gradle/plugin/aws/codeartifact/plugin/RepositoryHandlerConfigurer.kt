@@ -7,6 +7,8 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider
 import java.net.URI
 
@@ -35,10 +37,10 @@ internal class RepositoryHandlerConfigurer(
 
         @Suppress("unused")
         val closure = object : Closure<Any>(repositoryHandler, repositoryHandler) {
-            fun doCall(repositoryUrl: String, profile: String = "default", closure: Closure<*>? = null) {
+            fun doCall(repositoryUrl: String, profile: String? = null, closure: Closure<*>? = null) {
                 logger.info("Getting token for $repositoryUrl in profile $profile")
 
-                val token = serviceProvider.get().getToken(repositoryUrl, ProfileCredentialsProvider.create(profile))
+                val token = serviceProvider.get().getToken(repositoryUrl, getCredentialsProvider(profile))
                 val handler = delegate as RepositoryHandler
 
                 handler.maven { mavenRepo ->
@@ -57,10 +59,10 @@ internal class RepositoryHandlerConfigurer(
             }
 
             fun doCall(repoUrl: String) {
-                doCall(repoUrl, "default", null)
+                doCall(repoUrl, null, null)
             }
 
-            fun doCall(repoUrl: String, profile: String) {
+            fun doCall(repoUrl: String, profile: String?) {
                 doCall(repoUrl, profile, null)
             }
         }
@@ -72,11 +74,12 @@ internal class RepositoryHandlerConfigurer(
             val repositoryUri = artifactRepository.url
 
             if (isCodeArtifactUri(repositoryUri) && areCredentialsEmpty(artifactRepository)) {
-                val profile = resolveProfile()
+                val profile = artifactRepository.credentials.username ?: resolveProfile()
                 logger.info("Getting token for {} in profile {}", repositoryUri, profile)
 
-                val token =
-                    serviceProvider.get().getToken(repositoryUri.toURL(), ProfileCredentialsProvider.create(profile))
+                val credentialsProvider = getCredentialsProvider(profile)
+                val token = serviceProvider.get()
+                    .getToken(repositoryUri.toURL(), credentialsProvider)
 
                 artifactRepository.credentials { creds ->
                     creds.username = "aws"
@@ -87,12 +90,22 @@ internal class RepositoryHandlerConfigurer(
         }
     }
 
+    private fun getCredentialsProvider(profile: String?): AwsCredentialsProvider {
+        val profile = profile ?: resolveProfile()
+
+        return if (profile.isNullOrBlank()) {
+            DefaultCredentialsProvider.builder().build()
+        } else {
+            ProfileCredentialsProvider.create(profile)
+        }
+    }
+
     private fun resolveProfile(): String? {
         return System.getProperty("codeArtifact.profile") ?: System.getenv("CODEARTIFACT_PROFILE")
     }
 
     private fun areCredentialsEmpty(mavenRepo: MavenArtifactRepository): Boolean {
-        return mavenRepo.credentials.password == null && mavenRepo.credentials.username == null
+        return mavenRepo.credentials.password == null
     }
 
     private fun isCodeArtifactUri(uri: URI): Boolean = uri.toString().matches(CODEARTIFACT_URL_REGEX)
