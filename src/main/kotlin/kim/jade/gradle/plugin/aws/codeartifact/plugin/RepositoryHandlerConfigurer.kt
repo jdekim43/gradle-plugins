@@ -2,6 +2,7 @@ package kim.jade.gradle.plugin.aws.codeartifact.plugin
 
 import groovy.lang.Closure
 import kim.jade.gradle.plugin.aws.codeartifact.CodeArtifactService
+import kim.jade.gradle.plugin.aws.codeartifact.plugin.AwsCodeArtifactPlugin.Companion.USE_CODE_ARTIFACT_CREDENTIALS_TAG
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.logging.Logger
@@ -73,7 +74,7 @@ internal class RepositoryHandlerConfigurer(
         repositories.withType(MavenArtifactRepository::class.java).configureEach { artifactRepository ->
             val repositoryUri = artifactRepository.url
 
-            if (isCodeArtifactUri(repositoryUri) && isCodeArtifactCredentials(artifactRepository)) {
+            if (isCodeArtifactUri(repositoryUri) || isCodeArtifactCredentials(artifactRepository)) {
                 val profile = artifactRepository.credentials.password ?: resolveProfile()
                 logger.info("Getting token for {} in profile {}", repositoryUri, profile)
 
@@ -105,7 +106,7 @@ internal class RepositoryHandlerConfigurer(
     }
 
     private fun isCodeArtifactCredentials(mavenRepo: MavenArtifactRepository): Boolean {
-        return mavenRepo.credentials.username == "##useCodeArtifact##"
+        return (mavenRepo.url.scheme == "http" || mavenRepo.url.scheme == "https") && mavenRepo.credentials.username == USE_CODE_ARTIFACT_CREDENTIALS_TAG
     }
 
     private fun isCodeArtifactUri(uri: URI): Boolean = uri.toString().matches(CODEARTIFACT_URL_REGEX)

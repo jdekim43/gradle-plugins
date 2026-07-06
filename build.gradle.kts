@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "kim.jade"
-version = "0.1.8"
+version = "0.1.10"
 
 gradlePlugin {
     website = "https://github.com/jdekim43/gradle-plugins"

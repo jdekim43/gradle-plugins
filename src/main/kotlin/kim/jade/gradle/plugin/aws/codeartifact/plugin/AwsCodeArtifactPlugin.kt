@@ -7,6 +7,10 @@ import org.gradle.api.initialization.Settings
 @Suppress("unused")
 class AwsCodeArtifactPlugin : Plugin<Any> {
 
+    companion object {
+        const val USE_CODE_ARTIFACT_CREDENTIALS_TAG = "##code_artifact##"
+    }
+
     private val projectPlugin = ProjectPlugin()
     private val settingsPlugin = SettingsPlugin()
 
