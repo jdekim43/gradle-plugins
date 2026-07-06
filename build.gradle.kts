@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "kim.jade"
-version = "0.1.4"
+version = "0.1.7"
 
 gradlePlugin {
     website = "https://github.com/jdekim43/gradle-plugins"
@@ -17,6 +17,15 @@ gradlePlugin {
         displayName = "AWS CodeArtifact Gradle Plugin"
         description = "A Gradle plugin that allows you to access code artifacts easily."
         tags = listOf("aws", "codeartifact", "maven", "repository", "authentication")
+    }
+
+    plugins.register("cleanArchitecture") {
+        id = "kim.jade.gradle.plugin.cleanarch"
+        implementationClass = "kim.jade.gradle.plugin.cleanarch.plugin.CleanArchSettingsPlugin"
+
+        displayName = "Clean Architecture Toolbox Gradle Plugin"
+        description = "A Gradle plugin that support multi module clean architecture easily."
+        tags = listOf("clean-architecture")
     }
 }
 

@@ -73,8 +73,8 @@ internal class RepositoryHandlerConfigurer(
         repositories.withType(MavenArtifactRepository::class.java).configureEach { artifactRepository ->
             val repositoryUri = artifactRepository.url
 
-            if (isCodeArtifactUri(repositoryUri) && areCredentialsEmpty(artifactRepository)) {
-                val profile = artifactRepository.credentials.username ?: resolveProfile()
+            if (isCodeArtifactUri(repositoryUri) && isCodeArtifactCredentials(artifactRepository)) {
+                val profile = artifactRepository.credentials.password ?: resolveProfile()
                 logger.info("Getting token for {} in profile {}", repositoryUri, profile)
 
                 val credentialsProvider = getCredentialsProvider(profile)
@@ -104,8 +104,8 @@ internal class RepositoryHandlerConfigurer(
         return System.getProperty("codeArtifact.profile") ?: System.getenv("CODEARTIFACT_PROFILE")
     }
 
-    private fun areCredentialsEmpty(mavenRepo: MavenArtifactRepository): Boolean {
-        return mavenRepo.credentials.password == null
+    private fun isCodeArtifactCredentials(mavenRepo: MavenArtifactRepository): Boolean {
+        return mavenRepo.credentials.username == "##useCodeArtifact##"
     }
 
     private fun isCodeArtifactUri(uri: URI): Boolean = uri.toString().matches(CODEARTIFACT_URL_REGEX)
