@@ -6,15 +6,21 @@
 #### Usage
 ```
 plugins {
-  id("kim.jade.gradle.plugin.aws-codeartifact") version "0.1.2"
+  id("kim.jade.gradle.plugin.aws-codeartifact") version "0.1.10"
 }
 
 repositories {
-  codeArtifact("https://[code artifact url]", "profileName")
+  codeArtifact("https://[code artifact url]", "profileName") //profileName is optional
   
-  // or
+  maven("https://[domain].d.codeartifact.[region].amazonaws.com/maven/[repository]/")
   
-  maven("https://[code artifact url]")
+  maven("https://[custom code artifact url]") {
+    credentials.username = "##code_artifact##"
+    credentials.password = [profile name] //optional
+    
+    // or
+    
+    useCodeArtifactCredentials()
 }
 ```
 
