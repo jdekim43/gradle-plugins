@@ -49,6 +49,7 @@ fun RepositoryHandler.codeArtifact(
     }
 }
 
-fun AuthenticationSupported.useCodeArtifactCredentials() {
+fun AuthenticationSupported.useCodeArtifactCredentials(profileName: String? = null) {
     credentials.username = USE_CODE_ARTIFACT_CREDENTIALS_TAG
+    credentials.password = profileName
 }
