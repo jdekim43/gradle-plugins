@@ -4,15 +4,22 @@ import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
 import java.io.File
 
+@Suppress("unused")
 class CleanArchSettingsPlugin : Plugin<Settings> {
     override fun apply(target: Settings) {
     }
 }
 
-fun Settings.module(name: String, path: String) {
+private fun nameToPath(name: String) = name.replace('-', '/')
+
+fun Settings.module(name: String, path: String = nameToPath(name)) {
     val projectPath = File(settingsDir, path)
 
     if (!projectPath.exists()) {
+        return
+    }
+
+    if (!File(projectPath, "build.gradle.kts").exists() && !File(projectPath, "build.gradle").exists()) {
         return
     }
 
@@ -21,11 +28,21 @@ fun Settings.module(name: String, path: String) {
     project(":$moduleName").projectDir = projectPath
 }
 
-fun Settings.domain(name: String, extraModules: List<String> = emptyList()) {
-    module("$name-entity", "domain/$name/entity")
-    module("$name-usecase", "domain/$name/usecase")
+@Suppress("unused")
+fun Settings.core(name: String, path: String = "core/$name", prefix: String = "", extra: List<String> = emptyList()) {
+    module("$prefix$name-domain", "$path/domain")
+    module("$prefix$name-entity", "$path/entity")
+    module("$prefix$name-value", "$path/value")
+    module("$prefix$name-event", "$path/event")
+    module("$prefix$name-state", "$path/state")
+    module("$prefix$name-policy", "$path/policy")
 
-    for (moduleName in extraModules) {
-        module("$name-$moduleName", "domain/$name/$moduleName")
+    module("$prefix$name-application", "$path/application")
+    module("$prefix$name-usecase", "$path/usecase")
+    module("$prefix$name-port", "$path/port")
+    module("$prefix$name-repository", "$path/repository")
+
+    for (moduleName in extra) {
+        module("$name-$moduleName", "$path/$moduleName")
     }
 }

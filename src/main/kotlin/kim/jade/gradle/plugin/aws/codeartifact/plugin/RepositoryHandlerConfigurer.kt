@@ -2,7 +2,6 @@ package kim.jade.gradle.plugin.aws.codeartifact.plugin
 
 import groovy.lang.Closure
 import kim.jade.gradle.plugin.aws.codeartifact.CodeArtifactService
-import kim.jade.gradle.plugin.aws.codeartifact.plugin.AwsCodeArtifactPlugin.Companion.USE_CODE_ARTIFACT_CREDENTIALS_TAG
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.logging.Logger
@@ -23,9 +22,9 @@ internal class RepositoryHandlerConfigurer(
         private val CODEARTIFACT_URL_REGEX = "(?i).+\\.codeartifact\\..+\\.amazonaws\\..+".toRegex()
     }
 
-    fun installTo(repositoryHandler: RepositoryHandler) {
+    fun installTo(repositoryHandler: RepositoryHandler, defaultProfile: String?) {
         installCodeArtifactExtension(repositoryHandler)
-        configRepositories(repositoryHandler)
+        configRepositories(repositoryHandler, defaultProfile)
     }
 
     private fun installCodeArtifactExtension(repositoryHandler: RepositoryHandler) {
@@ -70,12 +69,12 @@ internal class RepositoryHandlerConfigurer(
         ext[EXTENSION_NAME] = closure
     }
 
-    private fun configRepositories(repositories: RepositoryHandler) {
+    private fun configRepositories(repositories: RepositoryHandler, defaultProfile: String?) {
         repositories.withType(MavenArtifactRepository::class.java).configureEach { artifactRepository ->
             val repositoryUri = artifactRepository.url
 
-            if (isCodeArtifactUri(repositoryUri) || isCodeArtifactCredentials(artifactRepository)) {
-                val profile = artifactRepository.credentials.password ?: resolveProfile()
+            if (isCodeArtifactUri(repositoryUri)) {
+                val profile = artifactRepository.credentials.username ?: defaultProfile
                 logger.info("Getting token for {} in profile {}", repositoryUri, profile)
 
                 val credentialsProvider = getCredentialsProvider(profile)
@@ -91,23 +90,12 @@ internal class RepositoryHandlerConfigurer(
         }
     }
 
-    private fun getCredentialsProvider(profile: String?): AwsCredentialsProvider {
-        val profile = profile ?: resolveProfile()
-
-        return if (profile.isNullOrBlank()) {
-            DefaultCredentialsProvider.builder().build()
-        } else {
-            ProfileCredentialsProvider.create(profile)
-        }
+    private fun getCredentialsProvider(profile: String?): AwsCredentialsProvider = if (profile.isNullOrBlank()) {
+        DefaultCredentialsProvider.builder().build()
+    } else {
+        ProfileCredentialsProvider.create(profile)
     }
 
-    private fun resolveProfile(): String? {
-        return System.getProperty("codeArtifact.profile") ?: System.getenv("CODEARTIFACT_PROFILE")
-    }
-
-    private fun isCodeArtifactCredentials(mavenRepo: MavenArtifactRepository): Boolean {
-        return (mavenRepo.url.scheme == "http" || mavenRepo.url.scheme == "https") && mavenRepo.credentials.username == USE_CODE_ARTIFACT_CREDENTIALS_TAG
-    }
-
-    private fun isCodeArtifactUri(uri: URI): Boolean = uri.toString().matches(CODEARTIFACT_URL_REGEX)
+    private fun isCodeArtifactUri(uri: URI): Boolean =
+        uri.toString().matches(CODEARTIFACT_URL_REGEX) || uri.fragment?.equals("isCodeArtifact") == true
 }

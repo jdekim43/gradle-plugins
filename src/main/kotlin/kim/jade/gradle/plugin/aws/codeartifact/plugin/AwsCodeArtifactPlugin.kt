@@ -8,7 +8,8 @@ import org.gradle.api.initialization.Settings
 class AwsCodeArtifactPlugin : Plugin<Any> {
 
     companion object {
-        const val USE_CODE_ARTIFACT_CREDENTIALS_TAG = "##code_artifact##"
+        const val DEFAULT_PROFILE_PROPERTY = "codeArtifact.profile"
+        const val DEFAULT_PROFILE_ENV_VAR = "CODEARTIFACT_PROFILE"
     }
 
     private val projectPlugin = ProjectPlugin()

@@ -1,10 +1,8 @@
 package kim.jade.gradle.plugin.aws.codeartifact.plugin
 
 import kim.jade.gradle.plugin.aws.codeartifact.CodeArtifactService
-import kim.jade.gradle.plugin.aws.codeartifact.plugin.AwsCodeArtifactPlugin.Companion.USE_CODE_ARTIFACT_CREDENTIALS_TAG
 import org.gradle.api.Action
 import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.api.artifacts.repositories.AuthenticationSupported
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.ExtensionAware
@@ -47,9 +45,4 @@ fun RepositoryHandler.codeArtifact(
         }
         action?.execute(mavenRepo)
     }
-}
-
-fun AuthenticationSupported.useCodeArtifactCredentials(profileName: String? = null) {
-    credentials.username = USE_CODE_ARTIFACT_CREDENTIALS_TAG
-    credentials.password = profileName
 }
